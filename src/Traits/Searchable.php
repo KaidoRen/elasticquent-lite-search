@@ -2,6 +2,8 @@
 
 namespace KaidoRen\ELSearch\Trais;
 
+use KaidoRen\ELSearch\Observers\ELSearchObserver;
+
 trait Searchable
 {
     public function getSearchableIndex(): string
@@ -17,5 +19,10 @@ trait Searchable
     public function getSearchableBody(): array
     {
         return $this->toArray();
+    }
+
+    public static function bootSearchable()
+    {
+        static::observe(ELSearchObserver::class);
     }
 }
