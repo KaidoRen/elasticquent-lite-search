@@ -1,0 +1,38 @@
+{
+    "name": "kaidoren/elasticquent-lite-search",
+    "description": "Extension for Eloquent that implements search using Elasticsearch",
+    "version": "1.0.0",
+    "keywords": [
+        "laravel",
+        "search",
+        "eloquent",
+        "elasticsearch",
+        "elasticquent-lite-search",
+        "lite-search"
+    ],
+    "require": {
+        "php": "^7.1.3",
+        "illuminate/support": "^5.8",
+        "elasticsearch/elasticsearch": "^7.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "KaidoRen",
+            "email": "gamingexru@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "KaidoRen\\ELSearch\\" : "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "KaidoRen\\ELSearch\\ELSearchServiceProvider"
+            ]
+        }
+    }
+}
