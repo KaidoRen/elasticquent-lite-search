@@ -5,7 +5,7 @@ namespace KaidoRen\ELSearch;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\ServiceProvider;
-use KaidoRen\ELSearch\Utils\ElasticsearchUtils;
+use KaidoRen\ELSearch\{Utils\ElasticsearchUtils, Console\Commands\Import};
 
 final class ELSearchServiceProvder extends ServiceProvider
 {
@@ -33,6 +33,12 @@ final class ELSearchServiceProvder extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/elsearch.php' => config_path('elsearch.php')
         ]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Import::class
+            ]);
+        }
     }
 
     /**
