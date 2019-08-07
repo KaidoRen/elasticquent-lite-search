@@ -5,6 +5,7 @@ namespace KaidoRen\ELSearch;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\ServiceProvider;
+use KaidoRen\ELSearch\Utils\ElasticsearchUtils;
 
 final class ELSearchServiceProvder extends ServiceProvider
 {
@@ -15,17 +16,11 @@ final class ELSearchServiceProvder extends ServiceProvider
      */
     public function register(): void
     {
-        $clientBuilder = ClientBuilder::create()
+        $this->bindingElasticsearchClient($client = ClientBuilder::create()
             ->setHosts(config('elsearch.elasticsearch.hosts'))
-            ->build();
+            ->build());
         
-        $this->app->bind(Client::class, function() use ($clientBuilder) {
-            return $clientBuilder;
-        });
-
-        $this->app->singleton('elasticsearch', function() use ($clientBuilder) {
-            return $clientBuilder;
-        });
+        $this->bindingElasticsearchUtils($client);
     }
 
     /**
@@ -38,5 +33,39 @@ final class ELSearchServiceProvder extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/elsearch.php' => config_path('elsearch.php')
         ]);
+    }
+
+    /**
+     * Binding Elasticsearch client into Laravel's service container
+     * 
+     * @param Client        $client
+     */
+    protected function bindingElasticsearchClient(Client $client)
+    {
+        $this->app->bind(Client::class, function() use ($client) {
+            return $client;
+        });
+
+        $this->app->singleton('elasticsearch', function() use ($client) {
+            return $client;
+        });
+    }
+
+    /**
+     * Binding Elasticsearch utils object into Laravel's service container
+     * 
+     * @param Client        $client
+     */
+    protected function bindingElasticsearchUtils(Client $client)
+    {
+        $utils = new ElasticsearchUtils($client);
+
+        $this->app->bind(ElasticsearchUtils::class, function() use ($utils) {
+            return $utils;
+        });
+
+        $this->app->singleton('elasticsearch-utils', function() use ($utils) {
+            return $utils;
+        });
     }
 }
