@@ -23,6 +23,8 @@ final class ELSearchServiceProvder extends ServiceProvider
      */
     public function boot(): void
     {
-
+        $this->publishes([
+            __DIR__.'/../config/elsearch.php' => config_path('elsearch.php')
+        ]);
     }
 }
