@@ -2,6 +2,8 @@
 
 namespace KaidoRen\ELSearch;
 
+use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Support\ServiceProvider;
 
 final class ELSearchServiceProvder extends ServiceProvider
@@ -13,7 +15,17 @@ final class ELSearchServiceProvder extends ServiceProvider
      */
     public function register(): void
     {
+        $clientBuilder = ClientBuilder::create()
+            ->setHosts(config('elsearch.elasticsearch.hosts'))
+            ->build();
+        
+        $this->app->bind(Client::class, function() use ($clientBuilder) {
+            return $clientBuilder;
+        });
 
+        $this->app->singleton('elasticsearch', function() use ($clientBuilder) {
+            return $clientBuilder;
+        });
     }
 
     /**
