@@ -4,6 +4,7 @@ namespace KaidoRen\ELSearch\Utils;
 
 use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
+use KaidoRen\ELSearch\Jobs\ELSearchJob as Job;
 
 class ElasticsearchUtils
 {
@@ -13,6 +14,11 @@ class ElasticsearchUtils
      * @var Client
      */
     protected $client;
+
+    /**
+     * Enabled or disabled queue
+     */
+    protected $queue;
     
     /**
      * @param Client        $client
@@ -20,6 +26,7 @@ class ElasticsearchUtils
     public function __construct(Client $client)
     {
         $this->client = $client;
+        $this->queue = config('elsearch.queue', true);
     }
 
     /**
@@ -27,15 +34,20 @@ class ElasticsearchUtils
      * 
      * @param Model     $model
      * 
-     * @return callable|array
+     * @return void
      */
-    public function createOrUpdate(Model $model)
+    public function createOrUpdate(Model $model): void
     {
         $params = $this->getBaseParams($model);
         $method = $this->putBodyParams($model, $params)
             ? 'update' : 'index';
 
-        return $this->client->{$method}($params);
+        if (!$this->queue) {
+            $this->client->{$method}($params);
+            return;
+        }
+
+        dispatch(new Job($method, $params));
     }
 
     /**
@@ -43,17 +55,20 @@ class ElasticsearchUtils
      * 
      * @param Model     $model
      * 
-     * @return callable|array
+     * @return void
      */
-    public function delete(Model $model)
+    public function delete(Model $model): void
     {
         $params = $this->getBaseParams($model);
 
         if ($this->client->exists($params)) {
-            return $this->client->delete($params);
-        }
+            if (!$this->queue) {
+                $this->client->delete($params);
+                return;
+            }
 
-        return [];
+            dispatch(new Job('delete', $params));
+        }
     }
 
     /**
