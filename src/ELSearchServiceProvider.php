@@ -17,7 +17,7 @@ final class ELSearchServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->bindingElasticsearchClient($client = ClientBuilder::create()
-            ->setHosts(config('elsearch.elasticsearch.hosts'))
+            ->setHosts(config('elsearch.elasticsearch.hosts', ['localhost:9200']))
             ->build());
         
         $this->bindingElasticsearchUtils($client);
