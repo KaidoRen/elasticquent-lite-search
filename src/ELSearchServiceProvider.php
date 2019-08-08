@@ -7,7 +7,7 @@ use Elasticsearch\ClientBuilder;
 use Illuminate\Support\ServiceProvider;
 use KaidoRen\ELSearch\{Utils\ElasticsearchUtils, Console\Commands\Import};
 
-final class ELSearchServiceProvder extends ServiceProvider
+final class ELSearchServiceProvider extends ServiceProvider
 {
     /**
      * Register the application services

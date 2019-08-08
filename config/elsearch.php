@@ -2,7 +2,7 @@
 
 return [
     'elasticsearch' => [
-        'host' => [ENV('ELSEARCH_HOST')],
+        'hosts' => [ENV('ELSEARCH_HOST', 'localhost:9200')],
     ],
 
     'queue' => true
