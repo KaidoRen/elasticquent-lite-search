@@ -57,6 +57,29 @@ class ElasticsearchUtils
     }
 
     /**
+     * Search query
+     * 
+     * @param string        $index
+     * @param string        $query
+     * @param array         $filterIds
+     * @param string        $defaultOperator
+     * 
+     * @return callable|array
+     */
+    public function search(string $index, string $query, array $filterIds = [], string $defaultOperator = 'OR')
+    {
+        $params['index'] = $index;
+        $params['body']['query']['bool']['must']['query_string']['query'] = "*{$query}*";
+        $params['body']['query']['bool']['must']['query_string']['default_operator'] = $defaultOperator;
+
+        if (count($filterIds)) {
+            $params['body']['query']['bool']['filter']['terms']['_id'] = $filterIds;
+        }
+
+        return $this->client->search($params); 
+    }
+
+    /**
      * 
      * @param Model     $model
      * @param array     $params

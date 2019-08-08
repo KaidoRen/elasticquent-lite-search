@@ -3,6 +3,7 @@
 namespace KaidoRen\ELSearch\Trais;
 
 use KaidoRen\ELSearch\Observers\ELSearchObserver;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Searchable
 {
@@ -19,6 +20,17 @@ trait Searchable
     public function getSearchableBody(): array
     {
         return $this->toArray();
+    }
+
+    public function scopeSearch(Builder $query, string $keywords)
+    {
+        $IDs = $query->get()->pluck($this->getKeyName())->toArray();
+        $response = app('elasticsearch-utils')
+            ->search($this->getSearchableIndex(), $keywords, $IDs);
+        
+        $IDs = array_column($response['hits']['hits'], '_id');
+
+        return $query->whereIn($this->getKeyName(), $IDs);
     }
 
     public static function bootSearchable()
