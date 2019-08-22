@@ -4,13 +4,12 @@ namespace KaidoRen\ELSearch\Utils;
 
 use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
-use KaidoRen\ELSearch\Jobs\ELSearchJob as Job;
 
 class ElasticsearchUtils
 {
     /**
      * Elasticsearch client
-     * 
+     *
      * @var Client
      */
     protected $client;
@@ -19,42 +18,41 @@ class ElasticsearchUtils
      * Enabled or disabled queue
      */
     protected $queue;
-    
+
     /**
      * @param Client        $client
      */
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->queue = config('elsearch.queue', true);
     }
 
     /**
      * Create or update index into Elasticsearch
-     * 
+     *
      * @param Model     $model
-     * 
+     *
      * @return void
      */
     public function createOrUpdate(Model $model): void
     {
         $params = $this->getBaseParams($model);
-        $method = $this->putBodyParams($model, $params)
-            ? 'update' : 'index';
 
-        if (!$this->queue) {
-            $this->client->{$method}($params);
+        if ($this->client->exists($params)) {
+            $params['body']['doc'] = $model->getSearchableBody();
+            $this->client->update($params);
             return;
         }
 
-        dispatch(new Job($method, $params));
+        $params['body'] = $model->getSearchableBody();
+        $this->client->index($params);
     }
 
     /**
      * Delete element from Elasticsearch
-     * 
+     *
      * @param Model     $model
-     * 
+     *
      * @return void
      */
     public function delete(Model $model): void
@@ -62,23 +60,18 @@ class ElasticsearchUtils
         $params = $this->getBaseParams($model);
 
         if ($this->client->exists($params)) {
-            if (!$this->queue) {
-                $this->client->delete($params);
-                return;
-            }
-
-            dispatch(new Job('delete', $params));
+            $this->client->delete($params);
         }
     }
 
     /**
      * Search query
-     * 
+     *
      * @param string        $index
      * @param string        $query
      * @param array         $filterIds
      * @param string        $defaultOperator
-     * 
+     *
      * @return callable|array
      */
     public function search(string $index, string $query, array $filterIds = [], string $defaultOperator = 'OR')
@@ -91,33 +84,23 @@ class ElasticsearchUtils
             $params['body']['query']['bool']['filter']['terms']['_id'] = $filterIds;
         }
 
-        return $this->client->search($params); 
+        return $this->client->search($params);
     }
 
     /**
-     * 
-     * @param Model     $model
-     * @param array     $params
-     * 
+     * Check exists model in Elasticsearch
+     *
+     * @param Model $model
      * @return bool
      */
-    protected function putBodyParams(Model $model, array &$params): bool
+    public function exists(Model $model)
     {
-        $body = $model->getSearchableBody();
-        
-        if ($this->client->exists($params)) {
-            $params['body']['doc'] = $body;
-            return true;
-        }
-
-        $params['body'] = $body;
-        
-        return false;
+        return $this->client->exists($this->getBaseParams($model));
     }
 
     /**
      * @param Model     $model
-     * 
+     *
      * @return array
      */
     protected function getBaseParams(Model $model)
@@ -125,7 +108,7 @@ class ElasticsearchUtils
         return [
             'index'     => $model->getSearchableIndex(),
             'type'      => $model->getSearchableType(),
-            'id'        => $model->getKey() 
+            'id'        => $model->getKey()
         ];
     }
 }
