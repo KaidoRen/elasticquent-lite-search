@@ -81,7 +81,7 @@ class ElasticsearchUtils
         $params['body']['query']['bool']['must']['query_string']['default_operator'] = $defaultOperator;
 
         if (count($filterIds)) {
-            $params['body']['query']['bool']['filter']['terms']['_id'] = $filterIds;
+            $params['body']['query']['bool']['filter']['ids']['values'] = $filterIds;
         }
 
         return $this->client->search($params);
