@@ -74,11 +74,15 @@ class ElasticsearchUtils
      *
      * @return callable|array
      */
-    public function search(string $index, string $query, array $filterIds = [], string $defaultOperator = 'OR')
+    public function search(string $index, string $query, array $filterIds = [], string $operator = 'OR')
     {
         $params['index'] = $index;
-        $params['body']['query']['bool']['must']['query_string']['query'] = "*{$query}*";
-        $params['body']['query']['bool']['must']['query_string']['default_operator'] = $defaultOperator;
+        $params['body']['query']['bool']['must']['multi_match'] = [
+            'query' => $query,
+            'fields' => ['*'],
+            'type' => 'phrase_prefix',
+            'operator' => $operator
+        ];
 
         if (count($filterIds)) {
             $params['body']['query']['bool']['filter']['ids']['values'] = $filterIds;
