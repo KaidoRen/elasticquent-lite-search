@@ -38,6 +38,10 @@ class ElasticsearchUtils
     {
         $params = $this->getBaseParams($model);
 
+        if (!$this->client->indices()->exists(['index' => $params['index']])) {
+            $this->createMappingsAndSettings($model);
+        }
+
         if ($this->client->exists($params)) {
             $params['body']['doc'] = $model->getSearchableBody();
             $this->client->update($params);
@@ -114,5 +118,27 @@ class ElasticsearchUtils
             'type'      => $model->getSearchableType(),
             'id'        => $model->getKey()
         ];
+    }
+
+    /**
+     * Create index with mappings and settings
+     *
+     * @param Model     $model
+     *
+     * @return void
+     */
+    protected function createMappingsAndSettings(Model $model): void
+    {
+        $params['index'] = $model->getSearchableIndex();
+
+        if (count($settings = $model->getSearchableSettings())) {
+            $params['body']['settings'] = $settings;
+        }
+
+        if (count($mappings = $model->getSearchableMappings())) {
+            $params['body']['body']['mappings'] = $mappings;
+        }
+
+        $this->client->indices()->create($params);
     }
 }

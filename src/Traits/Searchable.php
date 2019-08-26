@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait Searchable
 {
+    protected $searchableSettings = [];
+    protected $searchableMappings = [];
+
+    public function getSearchableSettings(): array
+    {
+        return $this->searchableSettings;
+    }
+
+    public function getSearchableMappings(): array
+    {
+        return $this->searchableMappings;
+    }
+    
     public function getSearchableIndex(): string
     {
         return $this->getTable();
