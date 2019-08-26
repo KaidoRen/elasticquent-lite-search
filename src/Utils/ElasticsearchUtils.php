@@ -136,7 +136,7 @@ class ElasticsearchUtils
         }
 
         if (count($mappings = $model->getSearchableMappings())) {
-            $params['body']['body']['mappings'] = $mappings;
+            $params['body']['mappings'] = $mappings;
         }
 
         $this->client->indices()->create($params);

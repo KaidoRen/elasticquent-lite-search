@@ -1,7 +1,7 @@
 {
     "name": "kaidoren/elasticquent-lite-search",
     "description": "Extension for Eloquent that implements search using Elasticsearch",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "keywords": [
         "laravel",
         "search",
