@@ -62,6 +62,6 @@ final class ELSearchObserver
     {
         $this->queue ?
             dispatch(new DeleteIndexJob($model))->delay(now()->addSecond()) :
-            $this->utils->createOrUpdate($model);
+            $this->utils->delete($model);
     }
 }
