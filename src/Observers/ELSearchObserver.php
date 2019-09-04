@@ -26,7 +26,7 @@ final class ELSearchObserver
     public function __construct(ElasticsearchUtils $utils)
     {
         $this->utils = $utils;
-        $this->queue = config('elsearch.queue', false);
+        $this->queue = config('elsearch.queue.models', false);
     }
 
     /**

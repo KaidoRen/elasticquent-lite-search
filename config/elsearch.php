@@ -5,5 +5,10 @@ return [
         'hosts' => [ENV('ELSEARCH_HOST', 'localhost:9200')],
     ],
 
-    'queue' => true
+    'queue' => [
+        'models' => false,
+        'commands' => [
+            'import' => false
+        ]
+    ],
 ];
